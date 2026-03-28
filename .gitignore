@@ -166,8 +166,12 @@ datasets/anylabeling/Screenshots
 datasets/yolo/*.cache
 datasets/yolo/train
 datasets/record/
+datasets/miss-bite/
+datasets/wrong-bite/
 label-studio-workspace/*
 .idea
 /models/od/best.pt
 models/bite_model/checkpoint*
 /label-studio-workspace/
+/wav2vec2-base/
+detect_error.jpg

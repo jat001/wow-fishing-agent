@@ -80,10 +80,34 @@ def stream(
 
         buffer = torch.zeros([channels, maxlen * chunk], dtype=torch.float32, device=device)
 
+        i = 0
         with torch.no_grad():
             for i in range(maxlen):
-                wave1 = np.frombuffer(stream.read(chunk), dtype=np.float32).reshape(-1, channels).T
-                buffer[:, i * chunk: (i + 1) * chunk] = torch.from_numpy(wave1)
+                wave1 = np.frombuffer(stream.read(chunk), dtype=np.float32).reshape(-1, audio_device.channels).T
+                if audio_device.channels != channels:
+                    if audio_device.channels == 1 and channels == 2:
+                        wave1 = np.repeat(wave1, 2, axis=0)
+                    elif audio_device.channels > 2 and channels == 2:
+                        left = wave1[0].copy()
+                        right = wave1[1].copy()
+
+                        if audio_device.channels >= 3:
+                            left += 0.707 * wave1[2]
+                            right += 0.707 * wave1[2]
+
+                        if audio_device.channels >= 5:
+                            left += 0.707 * wave1[4]
+                            right += 0.707 * wave1[5]
+
+                        if audio_device.channels >= 7:
+                            left += 0.5 * wave1[6]
+                            right += 0.5 * wave1[7]
+
+                        wave1 = np.array([left, right])
+                    else:
+                        mono = wave1.mean(axis=0)
+                        wave1 = np.tile(mono, (channels, 1))
+                buffer[:, i * chunk: (i + 1) * chunk] = torch.from_numpy(wave1.copy())
                 if i < window - 1:
                     continue
 
@@ -96,7 +120,7 @@ def stream(
                             pred, prob)
                 if pred == "bite":
                     return "bite", buffer[:, :(i + 1) * chunk], i + 1
-        return "other", buffer, None
+        return "other", buffer, i + 1
 
 
 def bite_as_negative(

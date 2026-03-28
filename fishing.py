@@ -46,13 +46,12 @@ class BiteSuite(BaseModel):
                     self.result_capture.image.save(f"{path}/result.jpg")
         elif self.result_capture is None:  # miss bite
             if self.audio_chunks is not None:
-                _path = f"datasets/miss-bite/{ts}"
+                _path = f"datasets/miss-bite/{ts}_{self.seconds}.wav"
                 logger.warning("save miss bite wav to {}", _path)
-                torchaudio.save(f"{_path}_16_miss.ogg", self.audio_chunks.cpu(), sample_rate)
+                torchaudio.save(_path, self.audio_chunks.cpu(), sample_rate)
         elif self.result_capture.miss > 0.5:  # wrong bite
             if self.audio_chunks is not None:
-                ts = datetime.datetime.now().strftime("%y%m%d-%H%M%S")
-                _path = f"datasets/wrong-bite/{ts}_{self.seconds}.ogg"
+                _path = f"datasets/wrong-bite/{ts}_{self.seconds}.wav"
                 logger.info("save wrong bite wav: {}", _path)
                 torchaudio.save(_path, self.audio_chunks.cpu(), sample_rate)
 
@@ -65,7 +64,7 @@ class SuiteSaveOption(str, Enum):
 
 def effective_scope(
         suite: BiteSuite, mouse: MouseController, retry: int = 20, valid_conf: float = 0.5,
-        mouse_start: MouseButton = MouseButton.middle
+        mouse_start: MouseButton = MouseButton.scroll_up
 ) -> Optional[ScreenCapture]:
     """下竿，检测鱼漂和提示信息"""
     capture = None
@@ -130,7 +129,7 @@ def main(
         window: int = 3,
         listen_seconds: int = 16,
         save_suite: SuiteSaveOption = SuiteSaveOption.nok,
-        mouse_start: MouseButton = MouseButton.middle, mouse_end: MouseButton = MouseButton.scroll_down,
+        mouse_start: MouseButton = MouseButton.scroll_up, mouse_end: MouseButton = MouseButton.scroll_down,
         pause_key: Optional[str] = 'f12'
 ):
     # 暂停检测

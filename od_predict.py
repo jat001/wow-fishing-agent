@@ -25,9 +25,9 @@ class ScreenCapture(BaseModel):
         if self.good != -1:
             sb += f"good[{float(self.good):.3f}] "
         if self.bad != -1:
-            sb += f"bad[{float(self.good):.3f}] "
+            sb += f"bad[{float(self.bad):.3f}] "
         if self.miss != -1:
-            sb += f"miss[{float(self.good):.3f}] "
+            sb += f"miss[{float(self.miss):.3f}] "
         return sb
 
 
